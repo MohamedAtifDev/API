@@ -22,6 +22,17 @@ namespace GraduationProjectAPI.BL.Repos
 
         public void Delete(int id)
         {
+            var data = db.Prescriptions.Where(a => a.Id == id).Include(a => a.orderHistories).Include(A => A.medicineOfPrescriptions).FirstOrDefault();
+
+            if (data.medicineOfPrescriptions?.Count() > 0)
+            {
+                throw new InvalidOperationException ("can not delete Prescription");
+            }
+            if (data.orderHistories!=null)
+            {
+                throw new Exception("can not delete patient assigned To Order");
+
+            }
             db.Prescriptions.Remove(db.Prescriptions.Find(id));
         }
 
@@ -75,6 +86,7 @@ namespace GraduationProjectAPI.BL.Repos
 
         public Prescription GetByIDWithSPecificRelatedData(int id)
         {
+
             return db.Prescriptions.Where(a => a.Id == id).Include(a => a.medicineOfPrescriptions).ThenInclude(a=>a.Medicine).Include(a=>a.Doctor).Select(a => new Prescription
             {
                 Id = a.Id,
@@ -89,8 +101,11 @@ namespace GraduationProjectAPI.BL.Repos
                 Id=a.Doctor.Id,
             },
                 PatientID = a.PatientID,
-                patient = new Patient
+                
+                
+                patient= new Patient
                 {
+
                     Id=a.patient.Id,
                     Email = a.patient.Email,
                     Name = a.patient.Name,

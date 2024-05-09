@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GraduationProjectAPI.BL.DTO;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GraduationProjectAPI.Controllers
 {
@@ -30,8 +31,17 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<DoctorVM>> GetAll()
         {
             var data = IDoctor.GetAll();
-            var result = mapper.Map<IEnumerable<DoctorVM>>(data);
-            return new CustomResponse<IEnumerable<DoctorVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() != 0)
+            {
+                var result = mapper.Map<IEnumerable<DoctorVM>>(data);
+                return new CustomResponse<IEnumerable<DoctorVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<DoctorVM>> { StatusCode = 200, Data = null, Message = "Data Not Foind" };
+
+            }
         }
 
         [HttpGet]
@@ -114,31 +124,40 @@ namespace GraduationProjectAPI.Controllers
 
         [HttpDelete]
         [Route("Delete/{id}")]
-        public async  Task<CustomResponse<DoctorVM>> Delete(int id)
+        public async Task<CustomResponse<DoctorVM>> Delete(int id)
         {
-            var data = IDoctor.GetById(id);
-            
-            var result = mapper.Map<DoctorVM>(data);
-            if (data is not null)
+            try
             {
-                var user = await userManager.FindByEmailAsync(data.Email);
-                if (user is not null)
+
+
+                var data = IDoctor.GetById(id);
+
+                var result = mapper.Map<DoctorVM>(data);
+                if (data is not null)
                 {
-                   await userManager.DeleteAsync(user);
+                    var user = await userManager.FindByEmailAsync(data.Email);
+                   
+                    IDoctor.Delete(id);
+                    if (user is not null)
+                    {
+                        await userManager.DeleteAsync(user);
+                    }
+
+                    return new CustomResponse<DoctorVM> { StatusCode = 200, Data = result, Message = "Doctor deleted successfully" };
+
                 }
-               
-                IDoctor.Delete(id);
-                return new CustomResponse<DoctorVM> { StatusCode = 200, Data = result, Message = "Doctor deleted successfully" };
+                else
+                {
+                    return new CustomResponse<DoctorVM> { StatusCode = 404, Data = null, Message = "Doctor Not Found" };
 
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return new CustomResponse<DoctorVM> { StatusCode = 404, Data = null, Message = "Doctor Not Found" };
-
+                return new CustomResponse<DoctorVM> { StatusCode = 500, Data = null, Message = ex.Message };
             }
-        }
-      
 
+}
     }
 }
 

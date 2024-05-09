@@ -35,8 +35,18 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<OrderHistoryVM>> GetAll()
         {
             var data = orderHistories.GetAll();
-            var result = mapper.Map<IEnumerable<OrderHistoryVM>>(data);
-            return new CustomResponse<IEnumerable<OrderHistoryVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() != 0)
+            {
+                var result = mapper.Map<IEnumerable<OrderHistoryVM>>(data);
+                return new CustomResponse<IEnumerable<OrderHistoryVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+               
+                return new CustomResponse<IEnumerable<OrderHistoryVM>> { StatusCode = 200, Data = null, Message = "Data Not Found" };
+
+            }
         }
 
         [HttpGet]

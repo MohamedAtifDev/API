@@ -28,8 +28,17 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<MedicineVM>> GetAll()
         {
             var data=imedicine.GetAll();
-            var result=mapper.Map<IEnumerable<MedicineVM>>(data);
-            return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode=200, Data = result,Message="Data Retreived Successfully" };
+            if (data.Count() != 0)
+            {
+                var result = mapper.Map<IEnumerable<MedicineVM>>(data);
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "Data Not Found" };
+
+            }
         }
 
         [HttpGet]
@@ -114,23 +123,41 @@ namespace GraduationProjectAPI.Controllers
         [Route("Delete/{id}")]
         public CustomResponse<MedicineVM> Delete(int id)
         {
-            var data = imedicine.GetByID(id);
-            var result=mapper.Map<MedicineVM>(data);
-            if (data is not null)
+            try
             {
-                imedicine.Delete(id);
-                return new CustomResponse<MedicineVM> { StatusCode = 200, Data = result, Message = "Medicine deleted successfully" };
 
-            }
-            else
+
+                var data = imedicine.GetByID(id);
+                var result = mapper.Map<MedicineVM>(data);
+                if (data is not null)
+                {
+                    imedicine.Delete(id);
+                    return new CustomResponse<MedicineVM> { StatusCode = 200, Data = result, Message = "Medicine deleted successfully" };
+
+                }
+                else
+                {
+                    return new CustomResponse<MedicineVM> { StatusCode = 404, Data = null, Message = "Medicine Not Found" };
+
+                }
+            }catch(Exception ex)
             {
-                return new CustomResponse<MedicineVM> { StatusCode = 404, Data = null, Message = "Medicine Not Found" };
+                return new CustomResponse<MedicineVM> { StatusCode = 500, Data = null, Message = ex.Message };
 
             }
         }
         [HttpGet("GetShelfNumbers")]
         public CustomResponse<IEnumerable<int>> GetShelfNumbers([FromQuery]int[] ids)
         {
+            foreach (var item in ids)
+            {
+                var res=imedicine.GetByID(item);
+                if(res is null)
+                {
+                    return new CustomResponse<IEnumerable<int>> { StatusCode = 400, Data = null, Message = $"id: {item} not found" };
+
+                }
+            }
             var data = imedicine.GetShelFNumbers(ids);
 
             return new CustomResponse<IEnumerable<int>> { StatusCode = 200, Data = data, Message = "ShelfNumbers Retreived Successfully" };
@@ -140,51 +167,95 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<MedicineVM>> GetSoonExpiredAndSoonOutOfStoock()
         {
             var data = imedicine.GetDangerData();
-            var result = mapper.Map<IEnumerable<MedicineVM>>(data);
-            return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() == 0)
+            {
+                var result = mapper.Map<IEnumerable<MedicineVM>>(data);
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "No Soon Expired And Soon OutOfStoock data found"};
+
+                }
         }
 
         [HttpGet("GetExpired")]
         public CustomResponse<IEnumerable<MedicineVM>> GetExpired()
         {
             var data = imedicine.GetExpired();
-            var result = mapper.Map<IEnumerable<MedicineVM>>(data);
-            return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() == 0)
+            {
+                var result = mapper.Map<IEnumerable<MedicineVM>>(data);
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "No Data Found" };
+
+            }
         }
 
         [HttpGet("GetOutOfStock")]
         public CustomResponse<IEnumerable<MedicineVM>> GetOutOfStock()
         {
             var data = imedicine.GetDangerData();
-            var result = mapper.Map<IEnumerable<MedicineVM>>(data);
-            return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() == 0)
+            {
+                var result = mapper.Map<IEnumerable<MedicineVM>>(data);
+                return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            }
+            return new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "No Data Found" };
+
         }
         [HttpGet("GetSoonToExpire")]
         public IActionResult GetSoonToExpire()
         {
             var soonToExpire = imedicine.GetexpiredSoon();
-            var result = mapper.Map<IEnumerable<MedicineVM>>(soonToExpire);
-
-            return Ok(new CustomResponse<IEnumerable<MedicineVM>>
+            if(soonToExpire.Count() == 0)
             {
-                StatusCode = 200,
-                Data = result,
-                Message = "Soon to expire medicines retrieved successfully."
-            });
+                var result = mapper.Map<IEnumerable<MedicineVM>>(soonToExpire);
+
+                return Ok(new CustomResponse<IEnumerable<MedicineVM>>
+                {
+                    StatusCode = 200,
+                    Data = result,
+                    Message = "Soon to expire medicines retrieved successfully."
+                });
+            }
+            else
+            {
+                return Ok(
+                    new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "No Data Found" }
+                );
+
+            }
+
         }
 
         [HttpGet("GetSoonOutOfStock")]
         public IActionResult GetSoonOutOfStock()
         {
-            var soonOutOfStock = imedicine.GetOutofStockSoon();
-            var result = mapper.Map<IEnumerable<MedicineVM>>(soonOutOfStock);
 
-            return Ok(new CustomResponse<IEnumerable<MedicineVM>>
+            var soonToExpire = imedicine.GetOutofStockSoon();
+            if (soonToExpire.Count() == 0)
             {
-                StatusCode = 200,
-                Data = result,
-                Message = "Soon out of stock medicines retrieved successfully."
-            });
+                var result = mapper.Map<IEnumerable<MedicineVM>>(soonToExpire);
+
+                return Ok(new CustomResponse<IEnumerable<MedicineVM>>
+                {
+                    StatusCode = 200,
+                    Data = result,
+                    Message = "Soon to expire medicines retrieved successfully."
+                });
+            }
+            else
+            {
+                return Ok(
+                    new CustomResponse<IEnumerable<MedicineVM>> { StatusCode = 404, Data = null, Message = "No Data Found" }
+                );
+
+            }
         }
 
         [HttpPost("SendOutStockToEsp")]

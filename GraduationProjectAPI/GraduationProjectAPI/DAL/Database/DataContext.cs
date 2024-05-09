@@ -17,25 +17,25 @@ namespace GraduationProjectAPI.DAL.Database
             base.OnModelCreating(builder);
             builder.Entity<MedicineOfPrescription>().HasKey(a => new { a.PrescriptionId, a.MedicineId });
 
-            builder.Entity<Medicine>().HasMany<MedicineOfPrescription>(a => a.medicineOfPrescriptions).WithOne(a => a.Medicine).IsRequired(false).OnDelete(DeleteBehavior.Cascade);
-            builder.Entity<Prescription>().HasMany<MedicineOfPrescription>(a => a.medicineOfPrescriptions).WithOne(a => a.prescription).IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<Medicine>().HasMany<MedicineOfPrescription>(a => a.medicineOfPrescriptions).WithOne(a => a.Medicine).IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<Prescription>().HasMany<MedicineOfPrescription>(a => a.medicineOfPrescriptions).WithOne(a => a.prescription).IsRequired(false).OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Patient>().HasMany<Prescription>(a => a.prescriptions).WithOne(a => a.patient).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
-            builder.Entity<Doctor>().HasMany<Prescription>(a => a.prescriptions).WithOne(a => a.Doctor).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
+            //builder.Entity<Patient>().HasMany<Prescription>(a => a.prescriptions).WithOne(a => a.patient).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
+            //builder.Entity<Doctor>().HasMany<Prescription>(a => a.prescriptions).WithOne(a => a.Doctor).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
 
-                builder.Entity<Patient>().HasMany<OrderHistory>(a=>a.orderHistories).WithOne(a=>a.Patient).IsRequired(false).OnDelete(
+            //    builder.Entity<Patient>().HasMany<OrderHistory>(a=>a.orderHistories).WithOne(a=>a.Patient).IsRequired(false).OnDelete(
                 
-                deleteBehavior:DeleteBehavior.SetNull
-                );
-            builder.Entity<Pharmacist>().HasMany<OrderHistory>(a => a.orderHistories).WithOne(a => a.Pharmacist).IsRequired(false).OnDelete(
+            //    deleteBehavior:DeleteBehavior.SetNull
+            //    );
+            //builder.Entity<Pharmacist>().HasMany<OrderHistory>(a => a.orderHistories).WithOne(a => a.Pharmacist).IsRequired(false).OnDelete(
 
-              deleteBehavior: DeleteBehavior.SetNull
-              );
+            //  deleteBehavior: DeleteBehavior.SetNull
+            //  );
 
-            builder.Entity<Prescription>().HasOne<OrderHistory>(a => a.orderHistories).WithOne(a => a.Prescription).IsRequired(false).OnDelete(
+            //builder.Entity<Prescription>().HasOne<OrderHistory>(a => a.orderHistories).WithOne(a => a.Prescription).IsRequired(false).OnDelete(
 
-              deleteBehavior: DeleteBehavior.SetNull
-              );
+            //  deleteBehavior: DeleteBehavior.SetNull
+            //  );
 
 
             builder.Entity<IdentityRole>().HasData(

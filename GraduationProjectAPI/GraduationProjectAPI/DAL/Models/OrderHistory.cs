@@ -13,7 +13,7 @@ namespace GraduationProjectAPI.DAL.Models
         
         public int? PharmacistId { get; set; }
         [ForeignKey("PharmacistId")]
-        public  Pharmacist? Pharmacist { get; set; }
+        public  Pharmacist ?Pharmacist { get; set; }
 
         public int? PatientID { get; set; }
         [ForeignKey("PatientID")]

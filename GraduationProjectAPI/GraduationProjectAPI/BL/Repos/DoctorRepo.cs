@@ -1,6 +1,7 @@
 ﻿using GraduationProjectAPI.BL.Interfaces;
 using GraduationProjectAPI.DAL.Database;
 using GraduationProjectAPI.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GraduationProjectAPI.BL.Repos
 {
@@ -20,7 +21,12 @@ namespace GraduationProjectAPI.BL.Repos
 
         public void Delete(int id)
         {
-            this.db.Doctors.Remove(db.Doctors.Find(id));
+            var doctor = db.Doctors.Where(a=>a.Id==id).Include(a=>a.prescriptions).FirstOrDefault();
+            if (doctor.prescriptions.Count() > 0)
+            {
+                throw new Exception("can not delete Doctor that assign Prescription");
+            }
+            this.db.Doctors.Remove(doctor);
             db.SaveChanges();
         }
 

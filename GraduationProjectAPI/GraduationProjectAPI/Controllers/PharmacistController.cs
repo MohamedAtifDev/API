@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using GraduationProjectAPI.BL.VM;
 using GraduationProjectAPI.DAL.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GraduationProjectAPI.Controllers
 {
@@ -29,8 +30,13 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<PharmacistVM>> GetAll()
         {
             var data = ipharmacist.GetAll();
-            var result = mapper.Map<IEnumerable<PharmacistVM>>(data);
-            return new CustomResponse<IEnumerable<PharmacistVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() != 0)
+            {
+                var result = mapper.Map<IEnumerable<PharmacistVM>>(data);
+                return new CustomResponse<IEnumerable<PharmacistVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            }
+            return new CustomResponse<IEnumerable<PharmacistVM>> { StatusCode = 404, Data = null, Message = "Data Not Found" };
+
         }
 
         [HttpGet]
@@ -115,25 +121,33 @@ namespace GraduationProjectAPI.Controllers
         [Route("Delete/{id}")]
         public async Task<CustomResponse<PharmacistVM>> Delete(int id)
         {
-            var data = ipharmacist.GetById(id);
-           
-            var result = mapper.Map<PharmacistVM>(data);
-            if (data is not null)
+            try
             {
-                var user = await userManager.FindByEmailAsync(data.Email);
-                if (user is not null)
+                var data = ipharmacist.GetById(id);
+
+                var result = mapper.Map<PharmacistVM>(data);
+                if (data is not null)
                 {
-                    await userManager.DeleteAsync(user);
+                    var user = await userManager.FindByEmailAsync(data.Email);
+               
+                    ipharmacist.Delete(id);
+                    if (user is not null)
+                    {
+                        await userManager.DeleteAsync(user);
+                    }
+                    return new CustomResponse<PharmacistVM> { StatusCode = 200, Data = result, Message = "Pharmacist deleted successfully" };
+
                 }
-                ipharmacist.Delete(id);
-                return new CustomResponse<PharmacistVM> { StatusCode = 200, Data = result, Message = "Pharmacist deleted successfully" };
+                else
+                {
+                    return new CustomResponse<PharmacistVM> { StatusCode = 404, Data = null, Message = "Pharmacist Not Found" };
+
+                }
+            }catch(Exception ex) {
+                return new CustomResponse<PharmacistVM> { StatusCode = 500, Data = null, Message = ex.Message };
 
             }
-            else
-            {
-                return new CustomResponse<PharmacistVM> { StatusCode = 404, Data = null, Message = "Pharmacist Not Found" };
 
-            }
         }
 
     }

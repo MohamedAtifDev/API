@@ -5,6 +5,7 @@ using GraduationProjectAPI.BL;
 using GraduationProjectAPI.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GraduationProjectAPI.Controllers
 {
@@ -25,8 +26,17 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> GetAll()
         {
             var data = ImedicineOfPrescription.GetAll();
-            var result = mapper.Map<IEnumerable<MedicineOfPrescriptionVM>>(data);
-            return new CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() != 0)
+            {
+                var result = mapper.Map<IEnumerable<MedicineOfPrescriptionVM>>(data);
+                return new CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> { StatusCode = 404, Data = null, Message = "DataNot Found" };
+
+            }
         }
 
         [HttpGet]
@@ -51,7 +61,7 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> GetByPrescriptionId(int PrescriptionId)
         {
             var data = ImedicineOfPrescription.GetById(PrescriptionId);
-            if (data is not null)
+            if (data.Count()==0)
             {
                 var result = mapper.Map<IEnumerable<MedicineOfPrescriptionVM>>(data);
                 return new CustomResponse<IEnumerable<MedicineOfPrescriptionVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };

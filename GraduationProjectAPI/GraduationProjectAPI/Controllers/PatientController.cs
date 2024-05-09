@@ -31,10 +31,20 @@ namespace GraduationProjectAPI.Controllers
             try
             {
                 var data=this.pateint.GetAll();
-                var result = mapper.Map<IEnumerable<PatientVM>>(data);
-                return new CustomResponse<IEnumerable<PatientVM>> { StatusCode=200,Data = result ,Message="Data Retrieved Successfully"};
+                if (data.Count() != 0)
+                {
+                    var result = mapper.Map<IEnumerable<PatientVM>>(data);
+                    return new CustomResponse<IEnumerable<PatientVM>> { StatusCode = 200, Data = result, Message = "Data Retrieved Successfully" };
+                }
+                else
+                {
+                    return new CustomResponse<IEnumerable<PatientVM>> { StatusCode = 200, Data = null, Message = "Data Not Found" };
 
-            }catch (Exception ex)
+                }
+
+
+            }
+            catch (Exception ex)
             {
                 return new CustomResponse<IEnumerable<PatientVM>> { StatusCode = 500, Data = null, Message = ex.Message };
 
@@ -110,6 +120,7 @@ namespace GraduationProjectAPI.Controllers
         {
             try
             {
+                
                
                     var patientToDelte = pateint.GetById(id);
                     var result=mapper.Map<PatientVM>(patientToDelte);
@@ -127,9 +138,9 @@ namespace GraduationProjectAPI.Controllers
 
 
             }
-            catch (Exception ex)
+            catch (Exception Exception)
             {
-                return new CustomResponse<PatientVM> { StatusCode = 500, Data = null, Message = ex.Message };
+                return new CustomResponse<PatientVM> { StatusCode = 500, Data = null, Message = Exception.Message };
 
             }
 

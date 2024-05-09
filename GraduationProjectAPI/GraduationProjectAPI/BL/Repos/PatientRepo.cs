@@ -4,6 +4,7 @@ using GraduationProjectAPI.BL.VM;
 using GraduationProjectAPI.DAL.Database;
 using GraduationProjectAPI.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace GraduationProjectAPI.BL.Repos
 {
@@ -23,6 +24,15 @@ namespace GraduationProjectAPI.BL.Repos
 
         public void Delete(int id)
         {
+            var data = db.patients.Where(a => a.Id == id).Include(a => a.orderHistories).Include(A => A.prescriptions).ToList().FirstOrDefault();
+            if (data.prescriptions.Count()>0 )
+            {
+                throw new Exception( "can not delete patient assigned To Prescription");
+            }
+            if(data.orderHistories.Count()>0){
+                throw new Exception("can not delete patient assigned To Order");
+
+            }
             this.db.patients.Remove(this.db.patients.Find(id));
             db.SaveChanges();
         }
@@ -92,15 +102,16 @@ namespace GraduationProjectAPI.BL.Repos
 
         public Patient GetById(int id)
         {
-            return db.patients.Where(a=>a.Id==id).Include(a => a.orderHistories).Include(a=>a.prescriptions)
+
+            return db.patients.Where(a => a.Id == id).Include(a => a.orderHistories).Include(a => a.prescriptions)
             .Select(a => new Patient
             {
                 Id = a.Id,
                 Name = a.Name,
                 age = a.age,
-                 Address = a.Address,
-                 Email = a.Email,
-                 phone=a.phone,
+                Address = a.Address,
+                Email = a.Email,
+                phone = a.phone,
                 prescriptions = a.prescriptions.Select(a => new Prescription
                 {
                     Id = a.Id,
@@ -108,14 +119,14 @@ namespace GraduationProjectAPI.BL.Repos
                     DateOfCreation = a.DateOfCreation,
                     Diagnosis = a.Diagnosis,
                     Barcode = a.Barcode,
-                  
+
                 }),
                 orderHistories = a.orderHistories.Select(a => new OrderHistory
                 {
-                
+
                     PharmacistId = a.PharmacistId,
                     DateOfCreation = a.DateOfCreation,
-                   
+
 
                 })
 

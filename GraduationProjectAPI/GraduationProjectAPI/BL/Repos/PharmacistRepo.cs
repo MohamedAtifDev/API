@@ -2,6 +2,7 @@
 using GraduationProjectAPI.BL.VM;
 using GraduationProjectAPI.DAL.Database;
 using GraduationProjectAPI.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GraduationProjectAPI.BL.Repos
 {
@@ -21,6 +22,13 @@ namespace GraduationProjectAPI.BL.Repos
 
         public void Delete(int id)
         {
+            var data = db.Pharmacists.Where(a => a.Id == id).Include(a => a.orderHistories).FirstOrDefault();
+
+            if (data.orderHistories.Count() > 0)
+            {
+                throw new Exception("can not delete Pharmacist assigned To Order");
+
+            }
             this.db.Pharmacists.Remove(db.Pharmacists.Find(id));
             db.SaveChanges();
         }

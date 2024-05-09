@@ -2,6 +2,7 @@
 using GraduationProjectAPI.BL.Interfaces;
 using GraduationProjectAPI.DAL.Database;
 using GraduationProjectAPI.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
 namespace GraduationProjectAPI.BL.Repos
@@ -22,6 +23,11 @@ namespace GraduationProjectAPI.BL.Repos
 
         public void Delete(int id)
         {
+            var medicine=db.Medicines.Where(a=>a.Id==id).Include(a=>a.medicineOfPrescriptions).FirstOrDefault();
+            if (medicine.medicineOfPrescriptions?.Count() > 0)
+            {
+                throw new Exception("can not delete Medicine that exist in Prescription");
+            }
             this.db.Remove(this.db.Medicines.Find(id));
             db.SaveChanges();
         }
@@ -44,7 +50,11 @@ namespace GraduationProjectAPI.BL.Repos
             for (int i = 0; i < ids.Length; i++)
             {
                 var data = GetByID(ids[i]);
-                ShelFNumbers.Add(data.ShelFNumber);
+                if (data != null)
+                {
+                    ShelFNumbers.Add(data.ShelFNumber);
+                }
+                
             }
             return ShelFNumbers;
         }

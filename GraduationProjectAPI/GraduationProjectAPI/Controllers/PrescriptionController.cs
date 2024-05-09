@@ -6,6 +6,7 @@ using GraduationProjectAPI.DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GraduationProjectAPI.BL.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GraduationProjectAPI.Controllers
 {
@@ -31,8 +32,17 @@ namespace GraduationProjectAPI.Controllers
         public CustomResponse<IEnumerable<PrescriptionVM>> GetAll()
         {
             var data = iPrescription.GetAll();
-            var result = mapper.Map<IEnumerable<PrescriptionVM>>(data);
-            return new CustomResponse<IEnumerable<PrescriptionVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+            if (data.Count() == 0)
+            {
+                var result = mapper.Map<IEnumerable<PrescriptionVM>>(data);
+                return new CustomResponse<IEnumerable<PrescriptionVM>> { StatusCode = 200, Data = result, Message = "Data Retreived Successfully" };
+
+            }
+            else
+            {
+                return new CustomResponse<IEnumerable<PrescriptionVM>> { StatusCode = 404, Data = null, Message = "No Data Found" };
+
+            }
         }
 
         [HttpGet]
@@ -160,17 +170,23 @@ namespace GraduationProjectAPI.Controllers
         [Route("Delete/{id}")]
         public CustomResponse<PrescriptionVM> Delete(int id)
         {
-            var data = iPrescription.GetByID(id);
-            var result = mapper.Map<PrescriptionVM>(data);
-            if (data is not null)
+            try
             {
-                iPrescription.Delete(id);
-                return new CustomResponse<PrescriptionVM> { StatusCode = 200, Data = result, Message = "Prescription deleted successfully" };
+                var data = iPrescription.GetByID(id);
+                var result = mapper.Map<PrescriptionVM>(data);
+                if (data is not null)
+                {
+                    iPrescription.Delete(id);
+                    return new CustomResponse<PrescriptionVM> { StatusCode = 200, Data = result, Message = "Prescription deleted successfully" };
 
-            }
-            else
-            {
-                return new CustomResponse<PrescriptionVM> { StatusCode = 404, Data = null, Message = "Prescription Not Found" };
+                }
+                else
+                {
+                    return new CustomResponse<PrescriptionVM> { StatusCode = 404, Data = null, Message = "Prescription Not Found" };
+
+                }
+            }catch(Exception ex) {
+                return new CustomResponse<PrescriptionVM> { StatusCode = 500, Data = null, Message = ex.Message };
 
             }
         }

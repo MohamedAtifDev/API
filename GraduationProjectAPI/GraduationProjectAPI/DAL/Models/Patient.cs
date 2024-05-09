@@ -26,7 +26,7 @@ namespace GraduationProjectAPI.DAL.Models
 
         public IEnumerable<Prescription> ?prescriptions { get; set; }
 
-        public  IEnumerable<OrderHistory>? orderHistories { get; set; }
+        public virtual IEnumerable<OrderHistory>? orderHistories { get; set; }
 
         public string phone { get; set; }
 
